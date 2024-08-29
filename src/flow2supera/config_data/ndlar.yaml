@@ -1,0 +1,39 @@
+# ===============
+# ndlar.yaml
+# ===============
+
+LogLevel:        INFO
+EventSeparator:  'spillID'
+ActiveDetectors: ["TPCActive_shape"]
+MaxSegmentSize:  0.03
+PropertyKeyword: 'ndlar'
+TileLayout: ''
+DetectorProperties: ''
+ParserRunConfig:
+    event_separator: 'eventID'
+ElectronEnergyThreshold: 5
+Type: ['sim', 'neutrino']
+
+BBoxAlgorithm: BBoxInteraction
+BBoxConfig:
+    LogLevel:   WARNING
+    Seed:       -1
+    BBoxSize:   [700.0,280.0,1330.0]
+    BBoxTop:    [350.0,60.0,910.0]
+    BBoxBottom: [-350.0,-220.0,420.0]
+    # NOTE: The VoxelSize will vary by module for MR5
+    VoxelSize:  [0.4434,0.4434,0.4434]
+
+LabelAlgorithm: LArTPCMLReco3D
+LabelConfig:
+    LogLevel: WARNING
+    DeltaSize:     3
+    ComptonSize:  10
+    LEScatterSize: 2
+    TouchDistance: 1
+    StoreLEScatter:   True
+    SemanticPriority: [1,0,2,3,4]
+    EnergyDepositThreshold: 0.0
+    RewriteInteractionID:  False
+    #WorldBoundMax: [-1.e20,-1.e20,-1.e20]
+    #WorldBoundMin: [ 1.e20, 1.e20, 1.e20]
