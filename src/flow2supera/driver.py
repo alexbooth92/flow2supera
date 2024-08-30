@@ -210,6 +210,7 @@ class SuperaDriver:
         
         if not is_sim:
             hits = data.hits
+            self._edeps_unassociated.reserve(len(hits))
             for i_ht, hit in enumerate(hits):
                 edep = supera.EDep()
                 edep.x = hit['x']
@@ -217,7 +218,7 @@ class SuperaDriver:
                 edep.z = hit['z']
                 edep.t = hit['t_drift']
                 edep.e = hit['E']
-                supera_event.unassociated_edeps.push_back(edep)
+                self._edeps_unassociated.push_back(edep)
             return supera_event
     
         if data.trajectories is None:

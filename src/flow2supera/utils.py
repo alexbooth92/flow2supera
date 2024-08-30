@@ -262,7 +262,7 @@ def run_supera(out_file='larcv.root',
         if save_log: logger['time_read'].append(time_read)
 
         t1 = time.time()
-        EventInput = driver.ReadEvent(input_data)
+        EventInput = driver.ReadEvent(input_data, is_sim=reader._is_sim)
         time_convert = time.time() - t1
         print("[run_supera] data conversion {:.3e} seconds".format(time_convert))
         if save_log: logger['time_convert'].append(time_convert)
@@ -279,7 +279,7 @@ def run_supera(out_file='larcv.root',
 
             t3 = time.time()
             tensor_hits = writer.get_data("sparse3d", "hits")
-            driver.Meta().edep2voxelset(EventInput.unassociated_edeps).fill_std_vectors(id_v, value_v)
+            driver.Meta().edep2voxelset(driver._edeps_unassociated).fill_std_vectors(id_v, value_v)
             larcv.as_event_sparse3d(tensor_hits, meta, id_v, value_v)          
 
         else:
