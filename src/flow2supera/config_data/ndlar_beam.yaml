@@ -1,5 +1,5 @@
 # ===============
-# 2x2_mpvmpr.yaml
+# ndlar_beam.yaml
 # ===============
 
 SuperaDriver:
@@ -29,10 +29,10 @@ BBoxAlgorithm: BBoxInteraction
 BBoxConfig:
     LogLevel:   WARNING
     Seed:       -1
-
-    BBoxSize:   [ 720.0, 350.0, 570.0]
-    BBoxTop:    [ 360.0, 100.0, 950.0]
-    BBoxBottom: [-360.0,-250.0, 380.0]
+    # [0.4434 * pow(2,8) * 7, 0.4434 * pow(2,7) * 7, 0.4434 * pow(2,8) * 5]
+    BBoxSize:   [ 794.5728, 397.2864, 567.552]
+    BBoxTop:    [ 397.2864, 123.6432, 948.7760]
+    BBoxBottom: [-397.2864,-273.6432, 381.224]
     VoxelSize:  [0.4434,0.4434,0.4434]
 
 LabelAlgorithm: LArTPCMLReco3D
