@@ -274,6 +274,7 @@ def run_supera(out_file='larcv.root',
         meta   = larcv_meta(driver.Meta())
 
         if not reader._is_sim:
+            writer.set_id(0, 0, int(input_data.event_id))  # TODO fill the run ID once available in flow
             time_generate = time.time() - t2
             if save_log: logger['time_generate'].append(time_generate)
 
@@ -283,11 +284,10 @@ def run_supera(out_file='larcv.root',
             larcv.as_event_sparse3d(tensor_hits, meta, id_v, value_v)          
 
         else:
-
             if input_data.trajectories is None:
                 print(f'[run_supera] WARNING skipping this entry {entry} as it appears to be "empty" (no truth association found, non-unique event id, etc.)')
                 continue
-
+            writer.set_id(0, 0, int(input_data.true_event_id)) #Fill MCTruth/edepsim ID for simulation
             driver.Meta().edep2voxelset(driver._edeps_all).fill_std_vectors(id_v, value_v)
             driver.GenerateLabel(EventInput) 
             time_generate = time.time() - t2
@@ -343,12 +343,11 @@ def run_supera(out_file='larcv.root',
 
         #propagating trigger info
         trigger = writer.get_data("trigger", "base")
-        trigger.id(int(input_data.event_id))  # fixme: this will need to be different for real data?
+
+        trigger.id(int(input_data.event_id))
         trigger.time_s(int(input_data.t0))
         trigger.time_ns(int(1e9 * (input_data.t0 - trigger.time_s())))
 
-        # TODO fill the run ID 
-        writer.set_id(0, 0, int(input_data.event_id))
         if save_log: logger['event_id'].append(input_data.event_id)
         writer.save_entry()
 
@@ -376,7 +375,7 @@ def run_supera(out_file='larcv.root',
 
     end_time = time.time()
     
-    print("\n----- [run_suera] finished -----\n")
+    print("\n----- [run_supera] finished -----\n")
     print("[run_supera] Total processing time in s: ", end_time-start_time,'\n')
 
 
