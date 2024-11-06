@@ -564,8 +564,7 @@ class SuperaDriver:
         # Larnd-sim stores a lot of these fields as numpy.uint32, 
         # but Supera/LArCV want a regular int, hence the type casting
         p.interaction_id = int(trajectory['vertex_id'])
-        p.trackid        = int(trajectory['traj_id']) 
-        p.genid = int(trajectory['traj_id'])
+        p.trackid        = int(trajectory['traj_id'])
         p.pdg            = int(trajectory['pdg_id'])
         p.px = trajectory['pxyz_start'][0]
         p.py = trajectory['pxyz_start'][1]
