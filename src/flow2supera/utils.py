@@ -129,7 +129,7 @@ def larcv_flash(f):
     larf.id              (int(f.flash_id))
     larf.time            (f.time)
     larf.timeWidth       (f.timeWidth)
-    larf.tpc             (f.tpc)
+    larf.volume_id       (f.volume_id)
     pe_vec = cppyy.gbl.std.vector('double')() #direct conversion of vector doesn't seem to work
     for pe in (f.PEPerOpDet):
         pe_vec.push_back(pe)

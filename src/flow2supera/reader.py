@@ -33,7 +33,7 @@ class Flash:
     time = FLOAT_MAX
     timeWidth = FLOAT_MAX
     PEPerOpDet = []
-    tpc = -1
+    volume_id = -1
 
 class Neutrino:
     idx = INT_MAX
@@ -214,7 +214,7 @@ class InputReader:
         flash_result.time = flash['hit_time_range'][0]*1e-9 + t0
         flash_result.timeWidth = (flash['hit_time_range'][1] - flash['hit_time_range'][0])*1e-9
         flash_result.PEPerOpDet = np.array(flash['deconv_sum']).flatten()#*0.022857 #adc charge to pe conversion
-        flash_result.tpc = int(flash['tpc'])
+        flash_result.volume_id = int(flash['tpc'])
 
         return flash_result
     
