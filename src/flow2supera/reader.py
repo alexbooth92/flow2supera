@@ -99,7 +99,7 @@ class InputReader:
                             raise ValueError('ERROR! HitsType config parameter can only be prompt or final')
                 
         print(f'[InputReader] is sim? {self._is_sim} is mpvmpr? {self._is_mpvmpr}')
-        print(f'[InputReader] Type of calibrated hits used: {self._hits_type})
+        print(f'[InputReader] Type of calibrated hits used: {self._hits_type}')
 
     def __len__(self):
         if self._event_ids is None: return 0
