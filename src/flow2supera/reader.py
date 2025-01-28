@@ -77,6 +77,7 @@ class InputReader:
         self._is_sim = False
         self._is_mpvmpr= False
         self._has_light=False
+        self._hits_type = 'prompt'
         if config:
             if os.path.isfile(config):
                 file=config
@@ -91,9 +92,14 @@ class InputReader:
                     if 'DataType' in cfg['Flow2Supera']:
                         self._is_sim=cfg['Flow2Supera'].get('DataType')[0]=='sim'
                         self._is_mpvmpr=cfg['Flow2Supera'].get('DataType')[1]=='mpvmpr'  
+                    
+                    if 'HitsType' in cfg['Flow2Supera']:
+                        self._hits_type=cfg['Flow2Supera'].get('HitsType')
+                        if self._hits_type != 'prompt' or if self._hits_type != 'final':
+                            raise ValueError('ERROR! HitsType config parameter can only be prompt or final')
                 
         print(f'[InputReader] is sim? {self._is_sim} is mpvmpr? {self._is_mpvmpr}')
-
+        print(f'[InputReader] Type of calibrated hits used: {self._hits_type})
 
     def __len__(self):
         if self._event_ids is None: return 0
@@ -114,12 +120,12 @@ class InputReader:
         # These paths help us get the correct associations
         events_path            = 'charge/events/'
         events_data_path       = 'charge/events/data/'
-        event_hit_indices_path = 'charge/events/ref/charge/calib_prompt_hits/ref_region/'
+        event_hit_indices_path = f'charge/events/ref/charge/calib_{self._hits_type}_hits/ref_region/'
+        
         packets_path           = 'charge/packets'
-        calib_final_hits_path  = 'charge/calib_final_hits/data'
-        calib_prompt_hits_path = 'charge/calib_prompt_hits/data'
+        calib_hits_path = f'charge/calib_{self._hits_type}_hits/data'
 
-        backtracked_hits_path  = 'mc_truth/calib_prompt_hit_backtrack/data'
+        backtracked_hits_path  = f'mc_truth/calib_{self._hits_type}_hit_backtrack/data'
         interactions_path      = 'mc_truth/interactions/data'
         segments_path          = 'mc_truth/segments/data'
         trajectories_path      = 'mc_truth/trajectories/data'
@@ -141,8 +147,11 @@ class InputReader:
             #ts_start is in ticks and 0.1 microseconds per tick for charge readout
             self._event_t0s = events_data['unix_ts'] + events_data['ts_start']/1e7 
             self._event_hit_indices = flow_manager[event_hit_indices_path]
-            self._hits              = flow_manager[calib_prompt_hits_path]
-
+            self._hits              = flow_manager[calib_hits_path]
+            if self._hits is None:
+                raise ValueError(f'No data in {calib_hits_path}')
+            if self._event_hit_indices is None:
+                raise ValueError(f'No data in {event_hit_indices_path}')
             if entries_to_read is not None:
                 self._event_ids = events_data['id'][:entries_to_read]
                 self._event_hit_indices = flow_manager[event_hit_indices_path][:entries_to_read]
@@ -156,6 +165,8 @@ class InputReader:
             
             if self._is_sim:
                 self._backtracked_hits  = flow_manager[backtracked_hits_path]
+                if self._backtracked_hits is None:
+                    raise ValueError(f'No data in {backtracked_hits_path}')
                 self._segments     = np.array(flow_manager[segments_path])
                 self._trajectories = np.array(flow_manager[trajectories_path])
                 self._interactions = np.array(flow_manager[interactions_path])

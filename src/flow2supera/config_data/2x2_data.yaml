@@ -14,6 +14,7 @@ Flow2Supera:
         DetectorProperties: ''
 
     DataType: ['data', '']
+    HitsType: 'prompt' #Only prompt or final
 
 BBoxAlgorithm: BBoxInteraction
 BBoxConfig:

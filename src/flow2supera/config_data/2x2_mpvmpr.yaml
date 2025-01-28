@@ -19,6 +19,7 @@ Flow2Supera:
     AssFractionLimit: 0.1
     ElectronEnergyThreshold: 0
     DataType: ['sim', 'mpvmpr']
+    HitsType: 'prompt' #Only prompt or final
     ClusterSizeLimit: 5
     DBSCANDist: 0.882366 # 1.99 * 0.4434
     DBSCANNjobs: 1 # -1 = all cores, but 1 may be faster
