@@ -95,7 +95,7 @@ class InputReader:
                     
                     if 'HitsType' in cfg['Flow2Supera']:
                         self._hits_type=cfg['Flow2Supera'].get('HitsType')
-                        if self._hits_type != 'prompt' or if self._hits_type != 'final':
+                        if self._hits_type != 'prompt' and self._hits_type != 'final':
                             raise ValueError('ERROR! HitsType config parameter can only be prompt or final')
                 
         print(f'[InputReader] is sim? {self._is_sim} is mpvmpr? {self._is_mpvmpr}')
