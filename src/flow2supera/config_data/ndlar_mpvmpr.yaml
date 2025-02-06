@@ -9,7 +9,7 @@ SuperaDriver:
 Flow2Supera:
     PropertyConfig:
         ParserConfigKeyword: 'ndlar'
-        SimConfigKeyword:    'ndlar_mpvmpr'
+        SimConfigKeyword:    'ndlar'
         TileLayout: ''
         DetectorProperties: ''
     #
