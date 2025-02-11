@@ -29,11 +29,10 @@ BBoxAlgorithm: BBoxInteraction
 BBoxConfig:
     LogLevel:   WARNING
     Seed:       -1
-    # [0.4434 * pow(2,8) * 7, 0.4434 * pow(2,7) * 7, 0.4434 * pow(2,8) * 5]
-    BBoxSize:   [ 760.0, 342.0, 532.0]
-    BBoxTop:    [ 380.0, 104.1287, 931.0]
-    BBoxBottom: [-380.0,-237.8713, 399.0]
-    VoxelSize:  [ 0.38, 0.38, 0.38]
+    BBoxSize:   [ 744.0, 334.8, 520.8]
+    BBoxTop:    [ 372.0, 100.5287, 925.4]
+    BBoxBottom: [-372.0,-234.2713, 404.6]
+    VoxelSize:  [ 0.372, 0.372, 0.372]
 
 LabelAlgorithm: LArTPCMLReco3D
 LabelConfig:
