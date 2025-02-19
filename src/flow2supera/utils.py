@@ -344,6 +344,7 @@ def run_supera(out_file='larcv.root',
         trigger.id(int(input_data.event_id))
         trigger.time_s(int(input_data.t0))
         trigger.time_ns(int(1e9 * (input_data.t0 - trigger.time_s())))
+        trigger.type(int(input_data.trig_type))
 
         if save_log: logger['event_id'].append(input_data.event_id)
         writer.save_entry()

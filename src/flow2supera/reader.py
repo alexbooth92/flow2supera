@@ -14,10 +14,12 @@ INT_MAX = (1 << 31) - 1
 
 class InputEvent:
     event_id = -1
+    trig_type = INT_MAX
     true_event_id = -1
     segments = None
     hit_indices = None
     hits = None
+    ext_trigs = None
     backtracked_hits = None
     calib_final_hits  = None
     trajectories = None
@@ -135,6 +137,10 @@ class InputReader:
         flash_light_ref_path = 'light/events/ref/light/flash/ref_region'
         charge_light_ref_path = 'charge/events/ref/light/events/ref_region'
 
+        ext_trigs_path = 'charge/ext_trigs/data'
+        ext_trigs_ref_path = 'charge/events/ref/charge/ext_trigs/ref_region'
+        
+
         
         # TODO Currently only reading one input file at a time. Is it 
         # necessary to read multiple? If so, how to handle non-unique
@@ -148,6 +154,8 @@ class InputReader:
             self._event_t0s = events_data['unix_ts'] + events_data['ts_start']/1e7 
             self._event_hit_indices = flow_manager[event_hit_indices_path]
             self._hits              = flow_manager[calib_hits_path]
+            self._ext_trigs         = flow_manager[ext_trigs_path]
+            self._ext_trigs_indices = flow_manager[ext_trigs_ref_path]
             if self._hits is None:
                 raise ValueError(f'No data in {calib_hits_path}')
             if self._event_hit_indices is None:
@@ -334,7 +342,12 @@ class InputReader:
         result.hit_indices = self._event_hit_indices[entry]
         hidx_min, hidx_max = self._event_hit_indices[entry]
         result.hits = self._hits[hidx_min:hidx_max]
-        
+
+        if self._ext_trigs:
+            trig_start, trig_stop= self._ext_trigs_indices[entry]
+            if trig_stop-trig_start == 1: #0 if no asociated external trigger and there shouldn't be more than 1
+                result.trig_type = self._ext_trigs[trig_start]['iogroup']
+                
         if self._has_light:
             #Light association
             event_flashes = []
@@ -395,6 +408,7 @@ class InputReader:
         print('-----------EVENT DUMP [InputReader] ------------')
         print('Event ID {}'.format(input_event.event_id))
         print('Event t0 {}'.format(input_event.t0))
+        print('External trigger type {}'.format(input_event.trig_type))
         print('Event hit indices (start, stop):', input_event.hit_indices)
         print('Hits shape:', input_event.hits.shape)
 
