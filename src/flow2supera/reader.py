@@ -372,6 +372,8 @@ class InputReader:
         result.segments = self._segments[self._segments['event_id']==st_event_id]
         result.trajectories = self._trajectories[self._trajectories['event_id']==st_event_id]
         
+        result.true_event_id = st_event_id
+
         if self._is_mpvmpr:
             print('[InputReader] SuperaInput filled (sim, mpvmpr)',time.time()-t0,'[s]')
             return result
@@ -379,7 +381,6 @@ class InputReader:
         #Find true neutrino interactions associated with the reco events
         result.interactions = []
         
-        result.true_event_id = st_event_id      
         interactions_array  = np.array(self._interactions)
         event_interactions = interactions_array[interactions_array['event_id'] == result.true_event_id]
         for ixn_idx, ixn in enumerate(event_interactions):

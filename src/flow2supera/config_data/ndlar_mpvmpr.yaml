@@ -1,0 +1,51 @@
+# ===============
+# ndlar_mpvmpr.yaml
+# ===============
+
+SuperaDriver:
+    LogLevel: WARNING
+    AssertInOutVoxelCount: True
+
+Flow2Supera:
+    PropertyConfig:
+        ParserConfigKeyword: 'ndlar'
+        SimConfigKeyword:    'ndlar'
+        TileLayout: ''
+        DetectorProperties: ''
+    #
+    # flow2supera.Driver configuration
+    #
+    AssChargeLimit: 0.09
+    AssFractionLimit: 0.1
+    ElectronEnergyThreshold: 0
+    DataType: ['sim', 'mpvmpr']
+    ClusterSizeLimit: 5
+    DBSCANDist: 0.74028 # 1.99 * 0.372
+    DBSCANNjobs: 1 # -1 = all cores, but 1 may be faster
+    DBSCANParticleCluster: True
+    DBSCANUnassociatedEDeps: True
+
+BBoxAlgorithm: BBoxInteraction
+BBoxConfig:
+    LogLevel:   WARNING
+    Seed:       -1
+    BBoxSize:   [ 744.0, 334.8, 520.8]
+    BBoxTop:    [ 372.0, 100.5287, 925.4]
+    BBoxBottom: [-372.0,-234.2713, 404.6]
+    VoxelSize:  [ 0.372, 0.372, 0.372]
+
+LabelAlgorithm: LArTPCMLReco3D
+LabelConfig:
+    #
+    # SuperaAtomic::Driver configuration
+    #
+    LogLevel: WARNING
+    DeltaSize:    10
+    ComptonSize:  10
+    LEScatterSize: 5
+    TouchDistance: 1
+    StoreLEScatter:   True
+    SemanticPriority: [1,0,2,3,4]
+    EnergyDepositThreshold: 0.0
+    RewriteInteractionID:  False
+    MergeUnassociatedEDeps: True
