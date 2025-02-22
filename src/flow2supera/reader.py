@@ -64,7 +64,6 @@ class Neutrino:
     
 class InputReader:
     
-    #def __init__(self, parser_run_config, config=None):
     def __init__(self, config=None):
 
         self._event_ids = None
@@ -76,7 +75,6 @@ class InputReader:
         self._segments = None
         self._trajectories = None
         self._interactions = None
-        #self._run_config = parser_run_config
         self._is_sim = False
         self._is_mpvmpr= False
         self._has_light=False
