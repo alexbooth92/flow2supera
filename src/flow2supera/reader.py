@@ -28,7 +28,7 @@ class InputEvent:
     segment_index_min = -1
     event_separator = ''
     flashes = []
-    light_events = None
+    light_events = []
 
 class Flash:
     flash_id = -1
@@ -140,12 +140,15 @@ class InputReader:
         ext_trigs_path = 'charge/ext_trigs/data'
         ext_trigs_ref_path = 'charge/events/ref/charge/ext_trigs/ref_region'
         
-
+        self.charge_event_path = 'charge/events'
+        self.light_event_path = 'light/events'
+        self.light_flash_path = 'light/flash'
         
         # TODO Currently only reading one input file at a time. Is it 
         # necessary to read multiple? If so, how to handle non-unique
         # event IDs?
         flow_manager = h5flow.data.H5FlowDataManager(input_file, 'r')
+        self.manager = flow_manager
         with h5py.File(input_file, 'r') as fin:
             events = flow_manager[events_path]
             events_data = events['data']
@@ -196,16 +199,17 @@ class InputReader:
     def GetNeutrinoIxn(self, ixn, ixn_idx):
 
         interaction = Neutrino()
-        if isinstance(ixn,np.void):
-            return interaction
+        
+        # if isinstance(ixn,np.void):
+        #     return interaction
         
         interaction.idx = int(ixn_idx)
         interaction.interaction_id = int(ixn['vertex_id']) 
         interaction.target = int(ixn['target'])
-        interaction.x = ixn['x_vert']
-        interaction.y = ixn['y_vert']
-        interaction.z = ixn['z_vert']
-        interaction.time = ixn['t_vert']
+        interaction.x = ixn['vertex'][0]
+        interaction.y = ixn['vertex'][1]
+        interaction.z = ixn['vertex'][2]
+        interaction.time = ixn['t_event']
         interaction.pdg_code = int(ixn['nu_pdg'])
         interaction.lepton_pdg_code = int(ixn['lep_pdg'])  
         interaction.energy_init = ixn['Enu']
@@ -343,31 +347,32 @@ class InputReader:
         hidx_min, hidx_max = self._event_hit_indices[entry]
         result.hits = self._hits[hidx_min:hidx_max]
 
+        #TODO: determine a hit threshold for noisy events
+        # if not self._is_sim and len(result.hits) < 50: #remove noisy events
+        #     print(f'[InputReader] No hits, skipping this entry ({entry})...')
+        #     return result
+            
         if self._ext_trigs:
             trig_start, trig_stop= self._ext_trigs_indices[entry]
             if trig_stop-trig_start == 1: #0 if no asociated external trigger and there shouldn't be more than 1
                 result.trig_type = self._ext_trigs[trig_start]['iogroup']
-                
+
         if self._has_light:
-            #Light association
+            result.light_events = []
             event_flashes = []
+            light_events = self.manager[self.charge_event_path, self.light_event_path, result.event_id]
+            if not np.ma.is_masked(light_events['id']): 
+                #print(light_events)
+                result.light_events = light_events.flatten()
+                #print(result.light_events)
+                for lev in result.light_events:
+                    flashes = self.manager[self.light_event_path, self.light_flash_path, lev['id']]
+                    if not np.ma.is_masked(flashes['id']): event_flashes.extend(flashes.flatten())
 
-            #link the light events associated with the charge event
-            light_events_start = self._light_event_indices[result.event_id][0]
-            light_events_stop = self._light_event_indices[result.event_id][1]
-
-            result.light_events = self._light_events[light_events_start:light_events_stop]
-
-            #link the flashes associated with the light events
-            for lev in result.light_events:
-                flash_start = self._flash_indices[lev['id']][0]
-                flash_end = self._flash_indices[lev['id']][1]
-                event_flashes.extend(self._flashes[flash_start:flash_end])
 
             result.flashes = []
-    
             for flash in event_flashes:
-                flash_result = self.GetFlash(flash, result.t0) #fix this with the actual light trigger time when the variable is added to flash
+                flash_result = self.GetFlash(flash, result.t0) 
                 result.flashes.append(flash_result)
                 
         if not self._is_sim:
@@ -413,8 +418,8 @@ class InputReader:
         print('Hits shape:', input_event.hits.shape)
 
         if self._has_light:
-            print('Associated light events:', len(input_event.light_events))
-            print('Associated flashes:', len(input_event.flashes))
+            if input_event.light_events: print('Associated light events:', len(input_event.light_events))
+            if input_event.flashes: print('Associated flashes:', len(input_event.flashes))
         
         if self._is_sim and len(input_event.hits) !=0:
             print('True event ID {}'.format(input_event.true_event_id))
