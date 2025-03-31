@@ -206,7 +206,7 @@ def run_supera(out_file='larcv.root',
   
     driver = get_flow2supera(config_key)
 
-    reader = flow2supera.reader.InputReader(driver.parser_run_config(), config_key)
+    reader = flow2supera.reader.InputReader(config_key)
 
     if num_events is None:
         reader.ReadFile(in_file)

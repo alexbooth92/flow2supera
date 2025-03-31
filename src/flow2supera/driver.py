@@ -2,7 +2,7 @@ import time
 from supera import supera
 from ROOT import supera, std, TG4TrajectoryPoint
 import numpy as np
-import LarpixParser
+#import LarpixParser
 import yaml
 from yaml import Loader
 from sklearn.cluster import DBSCAN
@@ -107,33 +107,14 @@ class SuperaDriver:
     def LoadPropertyConfigs(self,cfg_dict):
 
         # Expect only PropertyKeyword or (TileLayout,DetectorProperties). Not both.
-        if cfg_dict.get('PropertyKeyword') or cfg_dict.get('ParserConfigKeyword'):
-            if cfg_dict.get('TileLayout',None) or cfg_dict.get('DetectorProperties',None):
-                print('PropertyKeyword provided:', cfg_dict['PropertyKeyword'])
-                print('But also founnd below:')
-                for keyword in ['TileLayout','DetectorProperties']:
-                    print('%s: "%s"' % (keyword,cfg_dict.get(keyword,None)))
-                    print('Bool',bool(cfg_dict.get(keyword,None)))
-
-                print('You cannot specify duplicated property infomration!')
-                return False
-            else:
-                try:
-                    self._run_config, self._geom_dict = LarpixParser.util.detector_configuration(cfg_dict['ParserConfigKeyword'])
-                    from larndsim.consts import detector
-                    detector.load_detector_properties(cfg_dict['SimConfigKeyword'])
-
-                except ValueError:
-                    print('Failed to load with PropertyKeyword',cfg_dict['PropertyKeyword'])
-                    print('Supported types:', LarpixParser.util.configuration_keywords())
-                    return False
+        from larndsim.consts import detector
+        if cfg_dict.get('SimConfigKeyword'):
+            detector.load_detector_properties(cfg_dict['SimConfigKeyword'])
+        elif cfg_dict.get('TileLayout') and cfg_dict.get('DetectorProperties'):
+            detector.set_detector_properties(cfg_dict['DetectorProperties'], cfg_dict['TileLayout'])
         else:
-            raise RuntimeError('Must contain "PropertyKeyword". Currently other run modes not supported.')
+            raise ValueError('Failed to load detector properties with SimConfigKeyword or DetectorProperties + TileLayout. Supported SimConfigKeyword: ', larndsim.config.list_config_keys())
             
-        # Event separator default value needs to be set.
-        # We repurpose "run_config" of EventParser to hold this attribute.
-        self._run_config['event_separator'] = 'eventID'
-        
         # Apply run config modification if requested
         run_config_mod = cfg_dict.get('ParserRunConfig',None)
         if run_config_mod:
