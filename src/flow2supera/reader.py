@@ -79,6 +79,8 @@ class InputReader:
         self._is_mpvmpr= False
         self._has_light=False
         self._hits_type = 'prompt'
+        self._include_disabled_channels = False
+        self._beam_trigger = None
         if config:
             if os.path.isfile(config):
                 file=config
@@ -98,7 +100,10 @@ class InputReader:
                         self._hits_type=cfg['Flow2Supera'].get('HitsType')
                         if self._hits_type != 'prompt' and self._hits_type != 'final':
                             raise ValueError('ERROR! HitsType config parameter can only be prompt or final')
-                
+                    if 'DisabledChannels' in cfg['Flow2Supera']:
+                        self._include_disabled_channels=cfg['Flow2Supera'].get('DisabledChannels', self._include_disabled_channels)
+                    if 'BeamTriggerIOgroup' in cfg['Flow2Supera']:
+                        self._beam_trigger=cfg['Flow2Supera'].get('BeamTriggerIOgroup')
         print(f'[InputReader] is sim? {self._is_sim} is mpvmpr? {self._is_mpvmpr}')
         print(f'[InputReader] Type of calibrated hits used: {self._hits_type}')
 
@@ -122,6 +127,7 @@ class InputReader:
         events_path            = 'charge/events/'
         events_data_path       = 'charge/events/data/'
         event_hit_indices_path = f'charge/events/ref/charge/calib_{self._hits_type}_hits/ref_region/'
+
         
         packets_path           = 'charge/packets'
         calib_hits_path = f'charge/calib_{self._hits_type}_hits/data'
@@ -165,7 +171,8 @@ class InputReader:
             if entries_to_read is not None:
                 self._event_ids = events_data['id'][:entries_to_read]
                 self._event_hit_indices = flow_manager[event_hit_indices_path][:entries_to_read]
-
+            if self._include_disabled_channels and 'is_disabled' not in self._hits.dtype.names:
+                raise ValueError ('No disabled channels field in hits dataset, please change config')
             self._has_light = 'light' in fin.keys() and 'flash' in fin['light'].keys()
             if self._has_light:
                 self._light_event_indices = flow_manager[charge_light_ref_path]
@@ -205,10 +212,10 @@ class InputReader:
         interaction.idx = int(ixn_idx)
         interaction.interaction_id = int(ixn['vertex_id']) 
         interaction.target = int(ixn['target'])
-        interaction.x = ixn['x_vert']
-        interaction.y = ixn['y_vert']
-        interaction.z = ixn['z_vert']
-        interaction.time = ixn['t_vert']
+        interaction.x = ixn['vertex'][0]
+        interaction.y = ixn['vertex'][1]
+        interaction.z = ixn['vertex'][2]
+        interaction.time = ixn['vertex'][3]
         interaction.pdg_code = int(ixn['nu_pdg'])
         interaction.lepton_pdg_code = int(ixn['lep_pdg'])  
         interaction.energy_init = ixn['Enu']
@@ -248,7 +255,7 @@ class InputReader:
         try:
 
             seg_ids = np.unique(np.concatenate([bhit['segment_ids'][bhit['fraction']!=0.] for bhit in backtracked_hits]))
-
+            
             sid_min,sid_max = seg_ids.min(),seg_ids.max()
 
             seg_range_mask = (self._segment_ids >= sid_min) & (self._segment_ids <= sid_max)
@@ -344,7 +351,14 @@ class InputReader:
 
         result.hit_indices = self._event_hit_indices[entry]
         hidx_min, hidx_max = self._event_hit_indices[entry]
-        result.hits = self._hits[hidx_min:hidx_max]
+        all_hits = self._hits[hidx_min:hidx_max]
+
+        if self._include_disabled_channels:
+            disabled_mask = ~all_hits['is_disabled']
+            enabled_indices = np.where(disabled_mask)[0]
+            result.hits = all_hits[disabled_mask] #self._hits[hidx_min:hidx_max]
+        else:
+            result.hits = all_hits
 
         #TODO: determine a hit threshold for noisy events
         # if not self._is_sim and len(result.hits) < 50: #remove noisy events
@@ -353,17 +367,19 @@ class InputReader:
             
         if self._ext_trigs:
             trig_start, trig_stop= self._ext_trigs_indices[entry]
-            if trig_stop-trig_start == 1: #0 if no asociated external trigger and there shouldn't be more than 1
-                result.trig_type = self._ext_trigs[trig_start]['iogroup']
+            if trig_stop-trig_start: #if there is asociated external trigger
+                ttypes = self._ext_trigs[trig_start:trig_stop]['iogroup']
+                if self._beam_trigger in ttypes: #beam takes precedence in data
+                    result.trig_type = self._beam_trigger
+                else: #otherwise just take the first trigger if more than 1
+                    result.trig_type = ttypes[0]
 
         if self._has_light:
             result.light_events = []
             event_flashes = []
             light_events = self.manager[self.charge_event_path, self.light_event_path, result.event_id]
             if not np.ma.is_masked(light_events['id']): 
-                #print(light_events)
                 result.light_events = light_events.flatten()
-                #print(result.light_events)
                 for lev in result.light_events:
                     flashes = self.manager[self.light_event_path, self.light_flash_path, lev['id']]
                     if not np.ma.is_masked(flashes['id']): event_flashes.extend(flashes.flatten())
@@ -377,19 +393,24 @@ class InputReader:
         if not self._is_sim:
             print('[InputReader] SuperaInput filled (not sim)',time.time()-t0,'[s]')
             return result
-        
-        result.backtracked_hits = self._backtracked_hits[hidx_min:hidx_max]
+
+        all_backtracked_hits = self._backtracked_hits[hidx_min:hidx_max]
+        if self._include_disabled_channels:
+            result.backtracked_hits = all_backtracked_hits[enabled_indices]
+        else:
+            result.backtracked_hits = all_backtracked_hits
         
         if self._valid_segment_event_ids[entry] < 0:
             print(f'[InputReader] Skipping this entry ({entry})...')
             return result
         
         st_event_id = self._valid_segment_event_ids[entry]
-
+        
         result.segments = self._segments[self._segments['event_id']==st_event_id]
         result.trajectories = self._trajectories[self._trajectories['event_id']==st_event_id]
         
         result.true_event_id = st_event_id
+
 
         if self._is_mpvmpr:
             print('[InputReader] SuperaInput filled (sim, mpvmpr)',time.time()-t0,'[s]')
