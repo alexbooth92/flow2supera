@@ -81,6 +81,7 @@ class InputReader:
         self._hits_type = 'prompt'
         self._include_disabled_channels = False
         self._beam_trigger = None
+        self._require_ext_trigs = False
         if config:
             if os.path.isfile(config):
                 file=config
@@ -104,6 +105,8 @@ class InputReader:
                         self._include_disabled_channels=cfg['Flow2Supera'].get('DisabledChannels', self._include_disabled_channels)
                     if 'BeamTriggerIOgroup' in cfg['Flow2Supera']:
                         self._beam_trigger=cfg['Flow2Supera'].get('BeamTriggerIOgroup')
+                    if 'RequireExtTrig' in cfg['Flow2Supera']:
+                        self._require_ext_trigs=cfg['Flow2Supera'].get('RequireExtTrig')
         print(f'[InputReader] is sim? {self._is_sim} is mpvmpr? {self._is_mpvmpr}')
         print(f'[InputReader] Type of calibrated hits used: {self._hits_type}')
 
@@ -164,6 +167,7 @@ class InputReader:
             self._hits              = flow_manager[calib_hits_path]
             self._ext_trigs         = flow_manager[ext_trigs_path]
             self._ext_trigs_indices = flow_manager[ext_trigs_ref_path]
+            self._n_ext_trigs       = events_data['n_ext_trigs']
             if self._hits is None:
                 raise ValueError(f'No data in {calib_hits_path}')
             if self._event_hit_indices is None:
@@ -340,6 +344,10 @@ class InputReader:
         if entry >= len(self._event_ids):
             print('[Inputreader] Entry {} is above allowed entry index ({})'.format(entry, len(self._event_ids)))
             print('              Invalid read request (returning None)')
+            return None
+
+        if self._require_ext_trigs and self._n_ext_trigs[entry] == 0:
+            print(f'Skipping event {entry} as there is no external triggers but the configuration requires it.')
             return None
 
         t0=time.time()

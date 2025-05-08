@@ -1,31 +1,29 @@
 # ===============
-# 2x2.yaml
+# fsd_data.yaml
 # ===============
 
-SuperaDriver:
-    LogLevel: WARNING
-    AssertInOutVoxelCount: False
-
+LogLevel:        INFO
 Flow2Supera:
     PropertyConfig:
-        SimConfigKeyword:    '2x2'
+        SimConfigKeyword:    'fsd'
         TileLayout: ''
         DetectorProperties: ''
 
+    ElectronEnergyThreshold: 5
     DataType: ['data', '']
-    HitsType: 'final' #Only prompt or final
-    BeamTriggerIOgroup: 5
-    DisabledChannels: False
+    HitsType: 'prompt' #Only prompt or final
+    RequireExtTrig: True
 
 BBoxAlgorithm: BBoxInteraction
 BBoxConfig:
     LogLevel:   WARNING
     Seed:       -1
 
-    BBoxSize:   [141.888,127.6992,141.888]
-    BBoxTop:    [70.944,63.8496,70.944]
-    BBoxBottom: [-70.944,-63.8496,-70.944]
-    VoxelSize:  [0.4434,0.4434,0.4434]
+    BBoxSize:   [100.44,316.2,100.44]
+    BBoxTop:    [50.22,158.1,50.22]
+    BBoxBottom: [-50.22,-158.1,-50.22]
+    #NOTE: The VoxelSize will vary by module for MR5
+    VoxelSize:  [0.372,0.372,0.372]
 
 LabelAlgorithm: LArTPCMLReco3D
 LabelConfig:
@@ -41,4 +39,3 @@ LabelConfig:
     SemanticPriority: [1,0,2,3,4]
     EnergyDepositThreshold: 0.0
     RewriteInteractionID:  False
-    MergeUnassociatedEDeps: True

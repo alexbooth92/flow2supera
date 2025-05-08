@@ -253,6 +253,8 @@ def run_supera(out_file='larcv.root',
 
         t0 = time.time()
         input_data = reader.GetEntry(entry)
+        if input_data is None:
+            continue
         #reader.EventDump(input_data)
         time_read = time.time() - t0
         print("[run_supera] reading input   {:.3e} seconds".format(time_read))

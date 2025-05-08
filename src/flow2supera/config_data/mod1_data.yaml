@@ -1,26 +1,27 @@
 # ===============
-# 2x2.yaml
+# mod1_data.yaml
 # ===============
 
 LogLevel:        INFO
 Flow2Supera:
     PropertyConfig:
-        ParserKeyword: 'mod1'
+        SimConfigKeyword:    'module0'
         TileLayout: ''
         DetectorProperties: ''
 
     ElectronEnergyThreshold: 5
     DataType: ['data', '']
     HitsType: 'prompt' #Only prompt or final
+    RequireExtTrig: True
 
 BBoxAlgorithm: BBoxInteraction
 BBoxConfig:
     LogLevel:   WARNING
     Seed:       -1
 
-    BBoxSize:   [141.888,127.6992,141.888]
-    BBoxTop:    [70.944,63.8496,70.944]
-    BBoxBottom: [-70.944,-63.8496,-70.944]
+    BBoxSize:   [66.51,127.6992,66.51]
+    BBoxTop:    [33.255,63.8496,33.255]
+    BBoxBottom: [-33.255,-63.8496,-33.255]
     #NOTE: The VoxelSize will vary by module for MR5
     VoxelSize:  [0.4434,0.4434,0.4434]
 

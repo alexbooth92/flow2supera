@@ -113,7 +113,8 @@ class SuperaDriver:
         elif cfg_dict.get('TileLayout') and cfg_dict.get('DetectorProperties'):
             detector.set_detector_properties(cfg_dict['DetectorProperties'], cfg_dict['TileLayout'])
         else:
-            raise ValueError('Failed to load detector properties with SimConfigKeyword or DetectorProperties + TileLayout. Supported SimConfigKeyword: ', larndsim.config.list_config_keys())
+            from larndsim.config import list_config_keys
+            raise ValueError('Failed to load detector properties with SimConfigKeyword or DetectorProperties + TileLayout. Supported SimConfigKeyword: ', list_config_keys())
             
         # Apply run config modification if requested
         run_config_mod = cfg_dict.get('ParserRunConfig',None)

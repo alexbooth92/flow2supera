@@ -8,7 +8,6 @@ SuperaDriver:
 
 Flow2Supera:
     PropertyConfig:
-        ParserConfigKeyword: '2x2'
         SimConfigKeyword:    '2x2_mpvmpr'
         TileLayout: ''
         DetectorProperties: ''
