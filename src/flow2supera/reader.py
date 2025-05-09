@@ -216,10 +216,16 @@ class InputReader:
         interaction.idx = int(ixn_idx)
         interaction.interaction_id = int(ixn['vertex_id']) 
         interaction.target = int(ixn['target'])
-        interaction.x = ixn['vertex'][0]
-        interaction.y = ixn['vertex'][1]
-        interaction.z = ixn['vertex'][2]
-        interaction.time = ixn['vertex'][3]
+        try:
+            interaction.x = ixn['vertex'][0]
+            interaction.y = ixn['vertex'][1]
+            interaction.z = ixn['vertex'][2]
+            interaction.time = ixn['vertex'][3]
+        except ValueError:
+            interaction.x = ixn['x_vert']
+            interaction.y = ixn['y_vert']
+            interaction.z = ixn['z_vert']
+            interaction.time = ixn['t_vert']
         interaction.pdg_code = int(ixn['nu_pdg'])
         interaction.lepton_pdg_code = int(ixn['lep_pdg'])  
         interaction.energy_init = ixn['Enu']
